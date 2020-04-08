@@ -5,12 +5,13 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+
 using System.Windows.Forms;
+
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
+
+using VisioForge.Types.OutputFormat;
 namespace AmThanh
 {
     public partial class Form1 : Form
@@ -35,12 +36,13 @@ namespace AmThanh
             sbtSave.Enabled = false;
             sbtPause.Enabled = false;
             cdDelete.Checked = true;
+            txtTenFile.Text = "";
         }
         public Form1()
         {
             InitializeComponent();
             setdefaul();
-            txtPathSave.Text = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
+            txtPathSave.Text = System.IO.Path.GetDirectoryName(@"C:\Users\huy\Desktop\myrecord\");
             d = new DirectoryInfo(txtPathSave.Text);//Assuming Test is your Folder    
             List<NAudio.Wave.WaveInCapabilities> sources = new List<NAudio.Wave.WaveInCapabilities>();
             for (int i = 0; i < NAudio.Wave.WaveIn.DeviceCount; i++)
@@ -59,17 +61,19 @@ namespace AmThanh
             }
 
             txtTenFile.Focus();
-            Location = new Point(Screen.PrimaryScreen.Bounds.Width-283,100);
+            Location = new Point(Screen.PrimaryScreen.Bounds.Width - 283, 100);
+
         }
 
         private void btRecord_Click(object sender, EventArgs e)
         {
-            if(txtTenFile.Text == string.Empty)
+            if (txtTenFile.Text == string.Empty)
             {
                 MessageBox.Show("Please type the name first!");
                 txtTenFile.Focus();
                 return;
             }
+
             DisposWave();
             if (!Directory.Exists(txtPathSave.Text))
             {
@@ -106,6 +110,7 @@ namespace AmThanh
             this.sbtRecord.Enabled = false;
             this.sbtStop.Enabled = true;
         }
+
 
         public void SourceStreamDataAvailable(object sender, WaveInEventArgs e)
         {
@@ -195,7 +200,7 @@ namespace AmThanh
 
             sourceStream1.StartRecording();
             output.Init(steam);
-            
+
             output.Play();
 
             output2.Init(steam2);
@@ -220,17 +225,17 @@ namespace AmThanh
 
         private void btPause_Click(object sender, EventArgs e)
         {
-            
+
             if (output != null)
             {
                 if (output.PlaybackState == PlaybackState.Playing)
                 {
-                    
+
                     output.Pause();
                 }
                 else if (output.PlaybackState == PlaybackState.Paused)
                 {
-                   
+
                     sbtPause.Enabled = false;
                     sbtOpen.Focus();
                     output.Play();
@@ -258,7 +263,7 @@ namespace AmThanh
 
         private void txtTenFile_TextChanged(object sender, EventArgs e)
         {
-
+            d = new DirectoryInfo(txtPathSave.Text);
             FileInfo[] Files = d.GetFiles("*.wav"); //Getting Text files
 
             foreach (FileInfo file in Files)
@@ -274,21 +279,20 @@ namespace AmThanh
         }
 
         private void sbtSave_Click(object sender, EventArgs e)
-        {            
+        {
             if (sourceStream1 != null)
             {
                 sourceStream1.StopRecording();
                 sourceStream1.Dispose();
                 sourceStream1 = null;
                 sbtSave.Enabled = false;
-                setdefaul();
                 sbtOpen.Focus();
                 txtTenFile.Text = "";
             }
             if (this.waveWriter != null)
             {
                 this.waveWriter.Dispose();
-                this.waveWriter = null;               
+                this.waveWriter = null;
             }
             steam.Dispose();
             steam2.Dispose();
@@ -299,8 +303,9 @@ namespace AmThanh
                 File.Delete(currentrecord);
                 File.Delete(currentrecord.Replace(".wav", "mic.wav"));
             }
+            setdefaul();
         }
-       
+
         private void sbtOpen_Click(object sender, EventArgs e)
         {
 
@@ -335,26 +340,26 @@ namespace AmThanh
 
         private void Form1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            
-           // if (e.KeyChar == (char)Keys.F1)
-           // {
-           //     btRecord_Click(null, null);
-           // }
-           // else
-           //if (e.KeyChar == (char)Keys.F2)
-           // {
-           //     btStop_Click(null, null);
-           // }
-           // else
-           //if (e.KeyChar == (char)Keys.F3)
-           // {
-           //     btPlay_Click(null, null);
-           // }
-           // else
-           //if (e.KeyChar == (char)Keys.F4)
-           // {
-           //     sbtSave_Click(null, null);
-           // }else
+
+            // if (e.KeyChar == (char)Keys.F1)
+            // {
+            //     btRecord_Click(null, null);
+            // }
+            // else
+            //if (e.KeyChar == (char)Keys.F2)
+            // {
+            //     btStop_Click(null, null);
+            // }
+            // else
+            //if (e.KeyChar == (char)Keys.F3)
+            // {
+            //     btPlay_Click(null, null);
+            // }
+            // else
+            //if (e.KeyChar == (char)Keys.F4)
+            // {
+            //     sbtSave_Click(null, null);
+            // }else
             if (e.KeyChar == (char)Keys.Escape)
             {
                 this.Close();
@@ -363,10 +368,97 @@ namespace AmThanh
 
         private void cdDelete_CheckedChanged(object sender, EventArgs e)
         {
-            if(cdDelete.Checked)
-            cdDelete.ForeColor = Color.FromArgb(0, 255, 21);
+            if (cdDelete.Checked)
+                cdDelete.ForeColor = Color.FromArgb(0, 255, 21);
             else
-            cdDelete.ForeColor = Color.FromArgb(229, 255, 0);
+                cdDelete.ForeColor = Color.FromArgb(229, 255, 0);
+        }
+
+        private void simpleButton1_Click_1(object sender, EventArgs e)
+        {
+            //recording
+            //stop record and delete 2 file
+            if (sbtStop.Enabled == true)
+            {
+                if (sourceStream != null)
+                {                   
+                    sourceStream.StopRecording();
+                    sourceStream.Dispose();
+                    sourceStream = null;
+                }
+
+                if (sourceStream1 != null)
+                {
+                    
+                    sourceStream1.StopRecording();
+                    sourceStream1.Dispose();
+                    sourceStream1 = null;
+                }
+                if (this.waveWriter == null)
+                {
+                    return;
+                }
+                if (this.waveWriter2 == null)
+                {
+                    return;
+                }
+                waveWriter.Dispose();
+                waveWriter2.Dispose();
+
+                this.waveWriter = null;
+                waveWriter2 = null;
+
+                if (cdDelete.Checked)
+                {
+                    File.Delete(currentrecord);
+                    File.Delete(currentrecord.Replace(".wav", "mic.wav"));
+                }
+
+                
+            }
+            //recorded 2 file wav separate
+            //want not to play and delete 2 file
+            else if (sbtPlay.Enabled == true)
+            {
+                if (cdDelete.Checked)
+                {
+                    File.Delete(currentrecord);
+                    File.Delete(currentrecord.Replace(".wav", "mic.wav"));
+                }
+                
+            }
+            //recording mix file
+            else if(sbtSave.Enabled == true)
+            {
+                if (sourceStream1 != null)
+                {
+                    sourceStream1.StopRecording();
+                    sourceStream1.Dispose();
+                    sourceStream1 = null;
+                    sbtSave.Enabled = false;
+                    setdefaul();
+                    sbtOpen.Focus();
+                    txtTenFile.Text = "";
+                }
+                if (waveWriter != null)
+                {
+                    waveWriter.Dispose();
+                    waveWriter = null;
+                }
+                steam.Dispose();
+                steam2.Dispose();
+                output.Dispose();
+                output2.Dispose();
+                if (cdDelete.Checked)
+                {
+                    File.Delete(currentrecord);
+                    File.Delete(currentrecord.Replace(".wav", "mic.wav"));
+                }
+                File.Delete(currentrecord.Replace(".wav", "mix.wav"));
+
+                
+            }
+            setdefaul();
         }
     }
 }
